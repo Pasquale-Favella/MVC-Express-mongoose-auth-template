@@ -2,14 +2,31 @@ const userService = require('../service/User.service');
 
 module.exports = class UserController {
 
-    static async getAllUsers(req , res){
-        const users = await userService.gelAllUsers();
-        res.json(users);
+    static async signInUsers(req , res , next ){
+        const { email , password } = req.body;
+
+        try {
+            const users = await userService.logInUser(email,password);
+            res.json(users);
+
+        } catch (error) {
+            res.status(404);
+            next(error);
+        }
+        
     }
 
-    static async createUser(req , res){
-        const {email , password }= req.body;
-        const result = await userService.createUser(email,password);
-        res.json(result);
+    static async signUpUser(req , res , next ){
+        const { email , password }= req.body;
+
+        try {
+
+            const user = await userService.createUser(email,password);
+            res.json(user);
+            
+        } catch (error) {
+            res.status(404);
+            next(error);
+        }
     }
 }
