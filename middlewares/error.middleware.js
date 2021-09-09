@@ -1,3 +1,4 @@
+const { NODE_ENV } = process.env;
 module.exports = class ErrorMiddleware {
 
     static notFound(req, res, next) {
@@ -10,7 +11,7 @@ module.exports = class ErrorMiddleware {
         res.status(res.statusCode || 500);
         res.json({
           message: err.message,
-          stack: err.stack,
+          stack: NODE_ENV ==='PROD' ? '' : err.stack,
         });
     }
 }

@@ -29,7 +29,7 @@ module.exports = class UserService {
             
         } catch (error) {
             console.log('ERROR : '+error);
-            throw new Error('ERROR : ' + error);
+            throw new Error(error);
         }
         
     }
@@ -56,8 +56,8 @@ module.exports = class UserService {
             }
 
         } catch (error) {
-            console.log(error);
-            throw new Error('ERROR : ' + error);
+            console.log('ERROR : '+error);
+            throw new Error(error);
         }
     }
 }
