@@ -4,12 +4,17 @@ const TokenUtil = require('../utils/token.util');
 const EmailValidatorUtil = require('../utils/emailValidator.util');
 const PasswordValidatorUtil = require('../utils/passwordValidator.util');
 
+const INVALID_CREDENTIALS = 'INVALID CREDENTIALS';
+
 module.exports = class UserService {
 
     static async logInUser(email,password){
 
         try {
-            const { valid, reason, validators } = await EmailValidatorUtil.validateMailRegex(email);
+            
+            PasswordValidatorUtil.validatePassword(password);
+
+            const { valid, reason, validators } = await EmailValidatorUtil.validateMail(email,false);
 
             if(!valid){
                 throw new Error(
@@ -28,15 +33,14 @@ module.exports = class UserService {
                         token
                     }
                 }else{
-                    throw new Error('INVALID CREDENTIALS')
+                    throw new Error(INVALID_CREDENTIALS)
                 }
               
             } else {
-                throw new Error('INVALID CREDENTIALS')
+                throw new Error(INVALID_CREDENTIALS)
             }
             
         } catch (error) {
-            console.log('ERROR : '+error);
             throw new Error(error);
         }
         
@@ -47,7 +51,7 @@ module.exports = class UserService {
         try {
 
             PasswordValidatorUtil.validatePassword(password);
-            
+
             const { valid, reason, validators } = await EmailValidatorUtil.validateMail(email);
 
             if(!valid){
@@ -58,7 +62,7 @@ module.exports = class UserService {
 
             const user =  await userModel.findOne({email});
 
-            if(user) throw new Error('INVALID CREDENTIALS');
+            if(user) throw new Error(INVALID_CREDENTIALS);
 
             const hashedPassword = await bcrypt.hash(password, 12);
             
@@ -74,7 +78,6 @@ module.exports = class UserService {
             }
 
         } catch (error) {
-            console.log('ERROR : '+error);
             throw new Error(error);
         }
     }
