@@ -1,7 +1,7 @@
 const userModel = require('../models/User');
 const bcrypt = require("bcryptjs");
 const TokenUtil = require('../utils/token.util');
-
+const EmailValidatorUtil = require('../utils/emailValidator.util');
 
 module.exports = class UserService {
 
@@ -37,6 +37,14 @@ module.exports = class UserService {
     static async createUser(email , password){
 
         try {
+            const { valid, reason, validators } = await EmailValidatorUtil.validateMail(email);
+
+            if(!valid){
+                throw new Error(
+                     validators[reason].reason
+                  );
+            }
+
             const user =  await userModel.findOne({email});
 
             if(user) throw new Error('INVALID CREDENTIALS');
@@ -47,7 +55,6 @@ module.exports = class UserService {
            
             const token = TokenUtil.createToken(newUser);
 
-            console.log(token)
 
             return {
                 id : newUser._id,
