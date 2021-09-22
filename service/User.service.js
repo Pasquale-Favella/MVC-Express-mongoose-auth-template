@@ -2,12 +2,20 @@ const userModel = require('../models/User');
 const bcrypt = require("bcryptjs");
 const TokenUtil = require('../utils/token.util');
 const EmailValidatorUtil = require('../utils/emailValidator.util');
+const PasswordValidatorUtil = require('../utils/passwordValidator.util');
 
 module.exports = class UserService {
 
     static async logInUser(email,password){
 
         try {
+            const { valid, reason, validators } = await EmailValidatorUtil.validateMailRegex(email);
+
+            if(!valid){
+                throw new Error(
+                     validators[reason].reason
+                );
+            }
             const user =  await userModel.findOne({email});
 
             if (user) {
@@ -37,12 +45,15 @@ module.exports = class UserService {
     static async createUser(email , password){
 
         try {
+
+            PasswordValidatorUtil.validatePassword(password);
+            
             const { valid, reason, validators } = await EmailValidatorUtil.validateMail(email);
 
             if(!valid){
                 throw new Error(
                      validators[reason].reason
-                  );
+                );
             }
 
             const user =  await userModel.findOne({email});
