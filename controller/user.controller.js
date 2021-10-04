@@ -21,8 +21,8 @@ module.exports = class UserController {
 
         try {
 
-            const user = await userService.createUser(email,password);
-            res.json(user);
+            const verificationMessage = await userService.createUser(email,password);
+            res.json(verificationMessage);
             
         } catch (error) {
             res.status(404);

@@ -8,7 +8,8 @@ const userSchema = new Schema({
         index: true,
         unique: true 
     },
-    password : String,  
+    password : String,
+    verified: { type: Boolean, default: false }  
   
 },{ timestamps: true });
 

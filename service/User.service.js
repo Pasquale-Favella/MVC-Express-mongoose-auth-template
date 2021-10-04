@@ -1,8 +1,8 @@
 const userModel = require('../models/User');
 const bcrypt = require("bcryptjs");
 const TokenUtil = require('../utils/token.util');
-const EmailValidatorUtil = require('../utils/emailValidator.util');
-const PasswordValidatorUtil = require('../utils/passwordValidator.util');
+const EmailService = require('./email.service');
+const MailVerificationService = require('./mailVerification.service');
 
 const INVALID_CREDENTIALS = 'INVALID CREDENTIALS';
 
@@ -11,20 +11,15 @@ module.exports = class UserService {
     static async logInUser(email,password){
 
         try {
-            
-            PasswordValidatorUtil.validatePassword(password);
 
-            const { valid, reason, validators } = await EmailValidatorUtil.validateMail(email,false);
-
-            if(!valid){
-                throw new Error(
-                     validators[reason].reason
-                );
-            }
             const user =  await userModel.findOne({email});
 
             if (user) {
+
+                if(!user.verified) throw new Error("Account must be enabled via verification link!");
+
                 const result = await bcrypt.compare(password, user.password);
+
                 if(result) {
                     const token = TokenUtil.createToken(user);
                     return {
@@ -50,16 +45,6 @@ module.exports = class UserService {
 
         try {
 
-            PasswordValidatorUtil.validatePassword(password);
-
-            const { valid, reason, validators } = await EmailValidatorUtil.validateMail(email);
-
-            if(!valid){
-                throw new Error(
-                     validators[reason].reason
-                );
-            }
-
             const user =  await userModel.findOne({email});
 
             if(user) throw new Error(INVALID_CREDENTIALS);
@@ -67,14 +52,14 @@ module.exports = class UserService {
             const hashedPassword = await bcrypt.hash(password, 12);
             
             const newUser = await userModel.create({email , password : hashedPassword});
-           
-            const token = TokenUtil.createToken(newUser);
+
+            const {slug} = await MailVerificationService.generateVerificationLink(newUser);
+
+            await EmailService.sendVerificationEmail(newUser.email,slug);
 
 
             return {
-                id : newUser._id,
-                email : newUser.email,
-                token : token
+                message : "Verification mail sent , check your inbox to enable account"
             }
 
         } catch (error) {

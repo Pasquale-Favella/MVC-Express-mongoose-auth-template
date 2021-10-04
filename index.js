@@ -10,6 +10,7 @@ const AuthMiddleware = require('./middlewares/auth.middleware');
 
 /* ROUTES IMPORT*/
 const userRoute = require('./routes/user.route');
+const verifyAccount = require('./routes/verifyAccount.route');
 const helloWorldRoute = require('./routes/helloworld.route');
 
 const port = process.env.PORT || 4000;
@@ -22,9 +23,11 @@ app.use(AuthMiddleware.checkTokenSetUser);
 
 /* ROUTES */
 app.use('/auth',userRoute);
+/* ROUTE TO ENABLE REGISTERED ACCOUNTS*/
+app.use('/verify',verifyAccount);
 
 /*PROTECTED DUMMY ROUTE AVAILABLE ONLY VIA
-AUTHORIZATION HEADER Bearer token PROVIDED THROUGH LOGIN OR SIGNUP*/
+AUTHORIZATION HEADER Bearer token PROVIDED THROUGH LOGIN*/
 app.use('/hello',AuthMiddleware.isLoggedIn,helloWorldRoute);
 
 /* ERROR RESPONSE HANDLING */
